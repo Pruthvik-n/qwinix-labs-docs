@@ -26,7 +26,7 @@ So we should have two containers, one for the rails apllication on nginx and ano
 
 So let's break it up into steps:
 
-##### Dockerfile for rails application
+###### Dockerfile for rails application
 
 The Dockerfile for building the rails application would be as follows:
 
@@ -76,7 +76,7 @@ The Dockerfile for building the rails application would be as follows:
 
 ____
 
-##### Configure unicorn
+###### Configure unicorn
 
 Add config/*unicorn.rb* for unicorn configuration
 
@@ -106,7 +106,7 @@ pid "#{shared_dir}/pids/unicorn.pid"
 
 ____
 
-##### Configure nginx
+###### Configure nginx
 
 We add the configuration files in a container folder, and the *nginx-sites.conf* file is as follows:
 
@@ -144,7 +144,7 @@ We add the configuration files in a container folder, and the *nginx-sites.conf*
 
 ____
 
-##### Docker-compose to get the app running
+###### Docker-compose to get the app running
 
 Once nginx and unicorn are configured, to get our app up and running we use a small shell script to start all the services (config/container/start-server.sh) which is the step 13 in our dockerfile.
 
