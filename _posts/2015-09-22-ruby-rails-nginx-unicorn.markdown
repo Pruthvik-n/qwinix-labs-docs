@@ -161,7 +161,7 @@ The shell script is as follows
 
 *Line 1*: Since we will be mounting a data-volume to the container, if unicorn is started once in a container its pid will be saved. To restart it in another container we first clear the old pid and start a new unicorn master process.
 
-*Line 2*: Then we check if all the gems are installed in the app, if not run bundle install. This is the reason we dont include 'bundle install' commmand in the dockerfile. Only the first time we run bundle install in the gem box (which is a busy box tiny image approx. 2.5 mb which acts as a gem cache).
+*Line 2*: Then we check if all the gems are installed in the app, if not run bundle install. This is the reason we dont include 'bundle install' commmand in the dockerfile. So we run bundle install in the gem box the BUNDLE_PATH is the /box folder in the gembox container.
 
 Once the gem dependencies are satisfied, unicorn is started in daemonized mode and nginx is started as well.
 
@@ -233,7 +233,7 @@ It can be seen that gems are installed into /box in gembox container
 
 
 
-To check if your gems are cached, try restarting the app.
+To check if your gems are cached and gems aren't installed again, try restarting the app.
 
 <img  src="{{site.baseurl}}/images/docker/ruby_app/ruby-rails-nginx-unicorn/gem-satisfied.png" >
 
