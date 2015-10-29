@@ -1,4 +1,4 @@
-	---
+---
 layout: post
 title:  "Rails on Nginx using Unicorn"
 date:   2015-09-17 11:05:32
