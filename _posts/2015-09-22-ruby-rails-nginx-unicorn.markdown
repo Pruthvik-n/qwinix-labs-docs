@@ -27,6 +27,7 @@ So we should have two containers, one for the rails apllication on nginx and ano
 The Dockerfile for building the rails application would be as follows:
 
 ```
+
 # Base Image
 FROM ruby:2.2.0
 
@@ -70,6 +71,7 @@ ENV RAILS_ENV development
 
 # Expose port 80 for nginx
 EXPOSE 80
+
 ```
 
 We add the configuration files in a container folder, and the *nginx-sites.conf* file is as follows:
