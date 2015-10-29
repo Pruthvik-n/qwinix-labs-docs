@@ -24,6 +24,10 @@ In our example,
 First, we set up nginx in front of Unicorn, then we have rails application on unicorn, which interacts with a postgres database.
 So we should have two containers, one for the rails apllication on nginx and another for the postgres database. To make things faster, we add our ruby gem cache in a separate container so that bundle install is much faster.
 
+So let's break it up into steps:
+
+##### Dockerfile for rails application
+
 The Dockerfile for building the rails application would be as follows:
 
 	#Base Image
@@ -70,11 +74,44 @@ The Dockerfile for building the rails application would be as follows:
 	#Expose port 80 for nginx
 	EXPOSE 80
 
+____
+
+##### Configure unicorn
+
+Add config/*unicorn.rb* for unicorn configuration
+
+{% highlight ruby %}
+
+# set path to application
+app_dir = "/rails_app"
+shared_dir = "#{app_dir}/tmp"
+working_directory app_dir
+
+
+# Set unicorn options
+worker_processes 1
+timeout 30
+
+# Set up socket location
+listen "#{shared_dir}/sockets/unicorn.sock", :backlog => 64
+
+# Logging
+stderr_path "#{app_dir}/log/unicorn.stderr.log"
+stdout_path "#{app_dir}/log/unicorn.stdout.log"
+
+# Set master PID location
+pid "#{shared_dir}/pids/unicorn.pid"
+
+{% endhighlight %}
+
+____
+
+##### Configure nginx
 
 We add the configuration files in a container folder, and the *nginx-sites.conf* file is as follows:
 
 	upstream unicorn_server {
-	  server unix:/App_home/tmp/sockets/unicorn.sock fail_timeout=0;
+	  server unix:/rails_app/tmp/sockets/unicorn.sock fail_timeout=0;
 	}
 
 	server {
@@ -105,31 +142,9 @@ We add the configuration files in a container folder, and the *nginx-sites.conf*
 	  }
 	}
 
-Add config/*unicorn.rb* for unicorn configuration
+____
 
-{% highlight ruby %}
-
-# set path to application
-app_dir = "/rails_app"
-shared_dir = "#{app_dir}/tmp"
-working_directory app_dir
-
-
-# Set unicorn options
-worker_processes 1
-timeout 30
-
-# Set up socket location
-listen "#{shared_dir}/sockets/unicorn.sock", :backlog => 64
-
-# Logging
-stderr_path "#{app_dir}/log/unicorn.stderr.log"
-stdout_path "#{app_dir}/log/unicorn.stdout.log"
-
-# Set master PID location
-pid "#{shared_dir}/pids/unicorn.pid"
-
-{% endhighlight %}
+##### Docker-compose to get the app running
 
 Once nginx and unicorn are configured, to get our app up and running we use a small shell script to start all the services (config/container/start-server.sh) which is the step 13 in our dockerfile.
 
@@ -200,17 +215,29 @@ Once, we have the docker-compose.yml file ready the whole application, along wit
 $ docker-compose up
 ```
 
+Also, for setting up the database in the container run
+
+```
+$ docker-compose run app rake db:setup
+```
+
 The first time you run the app, it checks for the gem file dependencies as we have mentioned in our script
 
 <img  src="{{site.baseurl}}/images/docker/ruby_app/ruby-rails-nginx-unicorn/first-time-up.png" >
+
+
 
 It can be seen that gems are installed into /box in gembox container
 
 <img  src="{{site.baseurl}}/images/docker/ruby_app/ruby-rails-nginx-unicorn/installed-in-box.png" >
 
+
+
 To check if your gems are cached, try restarting the app.
 
 <img  src="{{site.baseurl}}/images/docker/ruby_app/ruby-rails-nginx-unicorn/gem-satisfied.png" >
+
+
 
 Now, if you go to localhost:100 you should see your app up and running.
 
