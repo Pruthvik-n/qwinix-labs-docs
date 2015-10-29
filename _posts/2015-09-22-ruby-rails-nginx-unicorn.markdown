@@ -9,7 +9,7 @@ topic: docker
 A Rails application is usually deployed on nginx using *unicorn* or *puma* rather than using development servers such as *Webrick* or *thin*.
 To develop the docker way, our goal is to test and build our application in a production similar environment so that they can be deployed easily.
 
-### Unicorn
+#### Unicorn
 
 Unicorn is an HTTP server for Rack applications designed to only serve fast clients on low-latency, high-bandwidth connections and take advantage of features in Unix/Unix-like kernels.
 
@@ -17,7 +17,7 @@ Unicorn follows the Unix philosophy, load balancing in Unicorn is done by the OS
 
 Load balancing between worker processes is done by the OS kernel. All workers share a common set of listener sockets and does *non-blocking accept()* on them. The kernel will decide which worker process to give a socket to and workers will sleep if there is nothing to accept().
 
-### Rails on Unicorn
+#### Rails on Unicorn
 
 In our example,
 
@@ -26,53 +26,50 @@ So we should have two containers, one for the rails apllication on nginx and ano
 
 The Dockerfile for building the rails application would be as follows:
 
-```
+	#Base Image
+	FROM ruby:2.2.0
 
-# Base Image
-FROM ruby:2.2.0
+	RUN apt-get update
 
-RUN apt-get update
+	#Install nodejs
+	RUN apt-get install -qq -y nodejs
 
-# Install nodejs
-RUN apt-get install -qq -y nodejs
+	#Install Nginx.
+	RUN apt-get update && apt-get install -qq -y nginx
+	RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 
-# Install Nginx.
-RUN apt-get update && apt-get install -qq -y nginx
-RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+	#Change ownership and permissions
+	RUN chown -R www-data:www-data /var/lib/nginx
+	RUN chmod 775 -R /var/log/nginx
 
-# Change ownership and permissions
-RUN chown -R www-data:www-data /var/lib/nginx
-RUN chmod 775 -R /var/log/nginx
+	#Install the latest postgresql lib for pg gem
+	RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes libpq-dev
 
-# Install the latest postgresql lib for pg gem
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes libpq-dev
+	#Application home directory
+	ENV APP /rails_app
 
-# Application home directory
-ENV APP /rails_app
+	#Path for gems bundle install.
+	ENV BUNDLE_PATH /box
+	WORKDIR $APP
 
-# Path for gems bundle install.
-ENV BUNDLE_PATH /box
-WORKDIR $APP
+	#Add default nginx config
+	ADD config/container/nginx-sites.conf /etc/nginx/sites-enabled/default
 
-# Add default nginx config
-ADD config/container/nginx-sites.conf /etc/nginx/sites-enabled/default
+	#Add default unicorn config
+	ADD config/unicorn.rb $APP/config/unicorn.rb
 
-# Add default unicorn config
-ADD config/unicorn.rb $APP/config/unicorn.rb
+	#A script to start off unicorn and nginx and give executable permissions to it.
+	ADD config/container/start-server.sh /usr/bin/start-server
+	RUN chmod +x /usr/bin/start-server
 
-# A script to start off unicorn and nginx and give executable permissions to it.
-ADD config/container/start-server.sh /usr/bin/start-server
-RUN chmod +x /usr/bin/start-server
+	#Install Rails App in the container
+	ADD . $APP
 
-# Install Rails App in the container
-ADD . $APP
+	ENV RAILS_ENV development
 
-ENV RAILS_ENV development
+	#Expose port 80 for nginx
+	EXPOSE 80
 
-# Expose port 80 for nginx
-EXPOSE 80
-
-```
 
 We add the configuration files in a container folder, and the *nginx-sites.conf* file is as follows:
 
@@ -110,7 +107,8 @@ We add the configuration files in a container folder, and the *nginx-sites.conf*
 
 Add config/*unicorn.rb* for unicorn configuration
 
-```
+{% highlight ruby %}
+
 # set path to application
 app_dir = "/rails_app"
 shared_dir = "#{app_dir}/tmp"
@@ -130,19 +128,21 @@ stdout_path "#{app_dir}/log/unicorn.stdout.log"
 
 # Set master PID location
 pid "#{shared_dir}/pids/unicorn.pid"
-```
+
+{% endhighlight %}
 
 Once nginx and unicorn are configured, to get our app up and running we use a small shell script to start all the services (config/container/start-server.sh) which is the step 13 in our dockerfile.
-The shell script is as follows 
-```
-#!/bin/bash
 
-truncate -s 0 $APP/tmp/pids/unicorn.pid
-bundle check || bundle install
-bundle exec rake assets:precompile
-bundle exec unicorn -c config/unicorn.rb -D
-service nginx restart
-```
+The shell script is as follows 
+
+	#!/bin/bash
+
+	truncate -s 0 $APP/tmp/pids/unicorn.pid
+	bundle check || bundle install
+	bundle exec rake assets:precompile
+	bundle exec unicorn -c config/unicorn.rb -D
+	service nginx restart
+
 
 *Line 1*: Since we will be mounting a data-volume to the container, if unicorn is started once in a container its pid will be saved. To restart it in another container we first clear the old pid and start a new unicorn master process.
 
@@ -152,7 +152,8 @@ Once the gem dependencies are satisfied, unicorn is started in daemonized mode a
 
 We can now have our *docker-compose.yml* which allows us to easily link all the containers to get our app running. Add the following to docker-compose.yml in the application root directory.
 
-```
+{% highlight ruby %}
+
 db:
   image: postgres
   ports:
@@ -174,7 +175,8 @@ app:
     - db
   ports:
     - "100:80"
-```
+
+{% endhighlight %}
 
 The above yml file creates 3 containers:
 
