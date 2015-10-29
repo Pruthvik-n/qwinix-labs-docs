@@ -76,39 +76,37 @@ EXPOSE 80
 
 We add the configuration files in a container folder, and the *nginx-sites.conf* file is as follows:
 
-```
-upstream unicorn_server {
-  server unix:/App_home/tmp/sockets/unicorn.sock fail_timeout=0;
-}
+	upstream unicorn_server {
+	  server unix:/App_home/tmp/sockets/unicorn.sock fail_timeout=0;
+	}
 
-server {
-  listen 80;
+	server {
+	  listen 80;
 
-  root /rails_app/public;
-  try_files $uri @unicorn_server;
+	  root /rails_app/public;
+	  try_files $uri @unicorn_server;
 
-  location @unicorn_server {
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
-    proxy_set_header X-Forwarded-Proto https; 
-    proxy_redirect off;
-    proxy_pass http://unicorn_server;
-  }
+	  location @unicorn_server {
+	    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	    proxy_set_header Host $http_host;
+	    proxy_set_header X-Forwarded-Proto https; 
+	    proxy_redirect off;
+	    proxy_pass http://unicorn_server;
+	  }
 
-  location ~ ^/(assets|images|javascripts|stylesheets|swfs|system)/ {
-    gzip_static on;
-    expires max;
-    add_header Cache-Control public;
-    add_header Last-Modified "";
-    add_header ETag "";
+	  location ~ ^/(assets|images|javascripts|stylesheets|swfs|system)/ {
+	    gzip_static on;
+	    expires max;
+	    add_header Cache-Control public;
+	    add_header Last-Modified "";
+	    add_header ETag "";
 
-    open_file_cache max=1000 inactive=500s;
-    open_file_cache_valid 600s;
-    open_file_cache_errors on;
-    break;
-  }
-}
-```
+	    open_file_cache max=1000 inactive=500s;
+	    open_file_cache_valid 600s;
+	    open_file_cache_errors on;
+	    break;
+	  }
+	}
 
 Add config/*unicorn.rb* for unicorn configuration
 
