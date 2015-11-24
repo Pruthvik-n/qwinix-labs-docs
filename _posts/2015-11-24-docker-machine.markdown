@@ -55,6 +55,7 @@ You will see a list of comamnds that point the docker environment variables to m
 eval "$(docker-machine env myhost1)"
 
 docker info
+
 ```
 
 You can see after entering docker info that its our shell is pointed to the docker host on myhost1 VM which uses bootdocker.
@@ -67,9 +68,12 @@ docker ps -a
 eval "$(docker-machine env myhost2)"
 
 docker ps -a
+
 ```
 
 So now we have docker hosts running on different VMS, experient with them with respect to docker container networking.
 For multi-hosy networking and managing clusters of docker containers, have a look at Docker Swarm.
+
+
 
 
