@@ -60,8 +60,11 @@ You can see after entering docker info that its our shell is pointed to the dock
 
 ```
 docker run hello-world
+
 docker ps -a
+
 eval "$(docker-machine env myhost2)"
+
 docker ps -a
 ```
 
