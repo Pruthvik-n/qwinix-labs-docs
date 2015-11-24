@@ -52,17 +52,14 @@ docker-machine env myhost1`
 You will see a list of comamnds that point the docker environment variables to myhost1.To configure your shell to the above docker environment variables just run
 
 ```
-
 eval "$(docker-machine env myhost1)"
 
 docker info
-
 ```
 
 You can see after entering docker info that its our shell is pointed to the docker host on myhost1 VM which uses bootdocker.
 
 ```
-
 docker run hello-world
 
 docker ps -a
@@ -70,7 +67,6 @@ docker ps -a
 eval "$(docker-machine env myhost2)"
 
 docker ps -a
-
 ```
 
 So now we have docker hosts running on different VMS, experient with them with respect to docker container networking.
