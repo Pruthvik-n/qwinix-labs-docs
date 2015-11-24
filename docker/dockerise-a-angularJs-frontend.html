@@ -1,0 +1,24 @@
+---
+layout: default
+topic: docker
+---
+
+<div class="home">
+
+  <h1 class="page-heading">Dockerise a Ruby Application</h1>
+
+  <p>This guide will show you how to dockerise a AngularJS web frontend. 
+
+  <div style="margin:60px 0px;">
+    {% for post in site.categories.part-5 %}
+    	<div class="row">
+    		<div class="col-md-2">
+    			<div class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</div>
+    		</div>
+    		<div class="col-md-10">
+    			<a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+    		</div>
+    	</div>
+    {% endfor %}
+  </div>
+</div>
