@@ -53,7 +53,6 @@ You will see a list of comamnds that point the docker environment variables to m
 
 ```
 eval "$(docker-machine env myhost1)"
-
 docker info
 ```
 
@@ -61,11 +60,8 @@ You can see after entering docker info that its our shell is pointed to the dock
 
 ```
 docker run hello-world
-
 docker ps -a
-
 eval "$(docker-machine env myhost2)"
-
 docker ps -a
 ```
 
