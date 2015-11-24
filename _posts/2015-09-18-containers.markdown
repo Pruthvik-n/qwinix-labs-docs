@@ -148,6 +148,9 @@ or
   {% endhighlight %}
   
 
+$ docker run --rm --volumes-from pg_test -t -i busybox sh
+
+
 <a href="introduction-to-docker.html"><<Introduction</a> 
 <a style = "float:right" href="images.html">Images>></a> 
 
