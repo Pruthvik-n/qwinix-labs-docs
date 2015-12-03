@@ -59,13 +59,10 @@ docker info
 You can see after entering docker info that its our shell is pointed to the docker host on myhost1 VM which uses bootdocker.
 
 
-		docker run hello-world
-
-		docker ps -a
-
-		eval "$(docker-machine env myhost2)"
-
-		docker ps -a
+  docker run hello-world
+  docker ps -a
+  eval "$(docker-machine env myhost2)"
+  docker ps -a
 
 
 So now we have docker hosts running on different VMS, experient with them with respect to docker container networking.
